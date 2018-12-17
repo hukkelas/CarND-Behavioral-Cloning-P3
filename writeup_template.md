@@ -16,7 +16,7 @@ The goals / steps of this project are the following:
 * Summarize the results with a written report
 
 
-[//]: # (Image References)
+[//]: # "Image References"
 
 [image1]: ./examples/placeholder.png "Model Visualization"
 [image2]: ./examples/placeholder.png "Grayscaling"
@@ -36,6 +36,7 @@ The goals / steps of this project are the following:
 
 My project includes the following files:
 * model.py containing the script to create and train the model
+* utils.py: some general functions used in both model.py and drive.py
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
 * writeup_report.md or writeup_report.pdf summarizing the results
@@ -43,7 +44,7 @@ My project includes the following files:
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
-python drive.py model.h5
+python drive.py my_model_weights.h5
 ```
 
 #### 3. Submission code is usable and readable
@@ -60,13 +61,13 @@ The model includes RELU layers to introduce nonlinearity (code line 20), and the
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+I did not see the need to use dropout as a normalization technique. However, I did use BatchNormalization after each convolution layers, which does introduce a small factor of regularization.
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+
 
 #### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, with a learning rate of 0.0005. (model.py line 25).
 
 #### 4. Appropriate training data
 
@@ -78,13 +79,13 @@ For details about how I created the training data, see the next section.
 
 #### 1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to start with a simple CNN architecture then work from this. 
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+My first step was to use a convolution neural network model similar to the AlexNet. I thought this model might be appropriate because it is widely used, and has been successful for several tasks. From this I introduced several more layers in the network. 
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
-To combat the overfitting, I modified the model so that ...
+To combat the overfitting, I modified the model with batch normalization layers. This has a documented effect to combat overfitting, and improve the convergence of the model. I also introduced more data to the network. I recorded data from the initial track, both driving the usual direction, and changing direction. 
 
 Then I ... 
 
@@ -94,11 +95,35 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 #### 2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes: 
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+| Layer                     | Filters | Output size |
+| ------------------------- | ------- | ----------- |
+| Cropping2D                | --      | 90, 320, 3  |
+| Conv2D, ReLU              | 32      | 90, 320, 16 |
+| MaxPool2D                 | --      | 45, 160, 16 |
+| Conv2D, ReLU              | 32      | 45, 160, 32 |
+| Conv2D, ReLU              | 32      | 45, 160, 32 |
+| MaxPool2D                 | --      | 22, 80, 32  |
+| Conv2D, ReLU              | 64      | 22, 80, 64  |
+| Conv2D, ReLU              | 64      | 22, 80, 64  |
+| MaxPool2D                 | --      | 11, 40, 64  |
+| Conv2D, ReLU              | 128     | 11, 40, 128 |
+| Conv2D, ReLU              | 128     | 11, 40, 128 |
+| MaxPool2D                 | --      | 5, 20, 128  |
+| Conv2D, ReLU              | 256     | 5, 20, 256  |
+| MaxPool2D, Stride = [1,2] | --      | 4, 10, 256  |
+| Conv2D, ReLU              | 256     | 4, 10, 256  |
+| MaxPool2D                 | --      | 2, 5, 256   |
+| Conv2D, ReLU              | 512     | 2, 5, 512   |
+| MaxPool2D                 | --      | 1, 2, 512   |
+| Flatten                   | --      | 1024        |
+| Dense, ReLU               | 32      | 32          |
+| Dense                     | 1       | 1           |
 
-![alt text][image1]
+Each Conv2D layer is followed by a ReLU activation and BatchNorm2d. 
+
+The second to last Dense layer is used with a ReLU activation. 
 
 #### 3. Creation of the Training Set & Training Process
 
